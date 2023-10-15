@@ -5,7 +5,7 @@ using OrderRabbitMQApi.Repository;
 
 namespace OrderRabbitMQApi.Controller
 {
-    [Route("api/v1[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class OrderController : ControllerBase
     {
@@ -41,8 +41,7 @@ namespace OrderRabbitMQApi.Controller
          ///  Essa API aqui que deveria ter um "POST" faz parte de uma "triade" de Producer - Consumer e ESTA API é
          ///  somente para visualizar atualizar ou deletar dados.
          /// </summary>
-         /// 
-
+         
         [HttpPut("From-Body")]
         public async Task<ActionResult<CellConcertOrderDTO>> Updade([FromBody] CellConcertOrderDTO dto)
         {
