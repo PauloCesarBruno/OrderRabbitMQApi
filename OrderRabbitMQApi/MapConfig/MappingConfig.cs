@@ -10,7 +10,7 @@ public class MappingConfig
     {
         var MappingConfig = new MapperConfiguration(config =>
         {
-            config.CreateMap<CellConcertOrderDTO, CellConcertOrder>().ReverseMap();
+            config.CreateMap<OrderDTO, Order>().ReverseMap();
 
         });
         return MappingConfig;

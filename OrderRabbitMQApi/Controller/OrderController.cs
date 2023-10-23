@@ -19,14 +19,14 @@ namespace OrderRabbitMQApi.Controller
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CellConcertOrderDTO>>> GetAll()
+        public async Task<ActionResult<IEnumerable<OrderDTO>>> GetAll()
         {
             var odr = await _orderRepository.GetAll();
             return Ok(odr);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CellConcertOrderDTO>> GetById(int id)
+        public async Task<ActionResult<OrderDTO>> GetById(int id)
         {
             var msg = await _orderRepository.GetByIdAsync(id);
 
@@ -43,7 +43,7 @@ namespace OrderRabbitMQApi.Controller
          /// </summary>
          
         [HttpPut("From-Body")]
-        public async Task<ActionResult<CellConcertOrderDTO>> Updade([FromBody] CellConcertOrderDTO dto)
+        public async Task<ActionResult<OrderDTO>> Updade([FromBody] OrderDTO dto)
         {
             try
             {                     

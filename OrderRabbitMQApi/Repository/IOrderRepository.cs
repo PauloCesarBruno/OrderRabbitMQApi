@@ -4,9 +4,9 @@ namespace OrderRabbitMQApi.Repository
 {
     public interface IOrderRepository
     {
-        Task<IEnumerable<CellConcertOrderDTO>> GetAll();
-        Task<CellConcertOrderDTO> GetByIdAsync(int Id);
-        Task<CellConcertOrderDTO> Update(CellConcertOrderDTO dto);
+        Task<IEnumerable<OrderDTO>> GetAll();
+        Task<OrderDTO> GetByIdAsync(int Id);
+        Task<OrderDTO> Update(OrderDTO dto);
         Task<bool> Delete(int id);
 
     }

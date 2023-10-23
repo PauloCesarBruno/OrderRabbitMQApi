@@ -9,13 +9,5 @@ public class SQLContext : DbContext
 
     public SQLContext() { }
 
-    public DbSet<CellConcertOrder> orders { get; set; }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<CellConcertOrder>()
-            .Property(vc => vc.ValorConserto)
-            .HasColumnType("decimal(18, 2)");
-    }
+    public DbSet<Order> orders { get; set; }      
 }

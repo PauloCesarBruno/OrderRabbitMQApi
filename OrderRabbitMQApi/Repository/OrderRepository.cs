@@ -18,33 +18,33 @@ namespace OrderRabbitMQApi.Repository
             _mapper = mapper;
         }             
 
-        public async Task<IEnumerable<CellConcertOrderDTO>> GetAll()
+        public async Task<IEnumerable<OrderDTO>> GetAll()
         {
-            List<CellConcertOrder> cel = await _context.orders.ToListAsync();
-            return _mapper.Map<List<CellConcertOrderDTO>>(cel);
+            List<Order> cel = await _context.orders.ToListAsync();
+            return _mapper.Map<List<OrderDTO>>(cel);
         }
 
-        public async Task<CellConcertOrderDTO> GetByIdAsync(int id)
+        public async Task<OrderDTO> GetByIdAsync(int id)
         {
-            CellConcertOrder cel = await _context.orders
-           .Where(p => p.Id == id).FirstOrDefaultAsync() ?? new CellConcertOrder();
-            return _mapper.Map<CellConcertOrderDTO>(cel);
+            Order cel = await _context.orders
+           .Where(p => p.Id == id).FirstOrDefaultAsync() ?? new Order();
+            return _mapper.Map<OrderDTO>(cel);
         }
 
-        public async Task<CellConcertOrderDTO> Update(CellConcertOrderDTO dto)
+        public async Task<OrderDTO> Update(OrderDTO dto)
         {
-            CellConcertOrder cel = _mapper.Map<CellConcertOrder>(dto);
+            Order cel = _mapper.Map<Order>(dto);
             _context.orders.Update(cel);
             await _context.SaveChangesAsync();
-            return _mapper.Map<CellConcertOrderDTO>(cel);
+            return _mapper.Map<OrderDTO>(cel);
         }
         public async Task<bool> Delete(int id)
         {
 
             try
             {
-                CellConcertOrder cel = await _context.orders
-                .Where(o => o.Id == id).FirstOrDefaultAsync() ?? new CellConcertOrder();
+                Order cel = await _context.orders
+                .Where(o => o.Id == id).FirstOrDefaultAsync() ?? new Order();
                 if (cel.Id <= 0) return false;
                 _context.orders.Remove(cel);
                 await _context.SaveChangesAsync();
