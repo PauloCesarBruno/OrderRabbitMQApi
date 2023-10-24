@@ -1,69 +1,96 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using OrderRabbitMQApi.DTO;
+using OrderRabbitMQApi.Models;
 using OrderRabbitMQApi.Repository;
 
-namespace OrderRabbitMQApi.Controller
+namespace OrderRabbitMQApi.Controller;
+
+[Route("api/v1/[controller]")]
+[ApiController]
+public class OrderController : ControllerBase
 {
-    [Route("api/v1/[controller]")]
-    [ApiController]
-    public class OrderController : ControllerBase
+    private readonly IOrderRepository _orderRepository;
+    private readonly IMapper _mapper;
+
+    public OrderController(IOrderRepository orderRepository, IMapper mapper)
     {
-        private readonly IOrderRepository _orderRepository;
-        private readonly IMapper _mapper;
+        _orderRepository = orderRepository;
+        _mapper = mapper;
+    }
 
-        public OrderController(IOrderRepository orderRepository, IMapper mapper)
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<Order>>> GetAll()
+    {
+        var odr = await _orderRepository.GetAll();
+        return Ok(_mapper.Map<IEnumerable<OrderDTO>>(odr));
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Order>> GetById(int id)
+    {
+        var odr = await _orderRepository.GetByIdAsync(id);
+
+        if (odr == null)
         {
-            _orderRepository = orderRepository;
-            _mapper = mapper;
+            return BadRequest("Order " + id + " não foi localizada !");
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<OrderDTO>>> GetAll()
-        {
-            var odr = await _orderRepository.GetAll();
-            return Ok(odr);
-        }
+        var orderDto = _mapper.Map<OrderDTO>(odr);
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<OrderDTO>> GetById(int id)
-        {
-            var msg = await _orderRepository.GetByIdAsync(id);
+        return Ok(orderDto);
+    }
 
-            if (msg.Id <= 0) return NotFound("Ordem de serviço " + id + " não foi encontrada !!!");
-            return Ok(msg);
-        }
+    /// <summary>
+    ///  Essa Api Não possui o POST, pois o POST é atravez de um Producer que manda os dados para fila do
+    ///  RabbitMQ atravéz do "Postman", que por sua vez é consumido e persistido no Banco de Dados por outra
+    ///  API que é um Consumer, e, esse consumer faz pesistir os dados no Banco de Dados.
+    ///  Essa API aqui que deveria ter um "POST" faz parte de uma "triade" de Producer - Consumer e ESTA API é
+    ///  somente para visualizar atualizar ou deletar dados.
+    /// </summary>
 
-         /// <summary>
-         ///  Essa Api Não possui o POST, pois o POST é atravez de um Producer que manda os dados para fila do
-         ///  RabbitMQ atravéz do "Postman", que por sua vez é consumido e persistido no Banco de Dados por outra
-         ///  API que é um Consumer, e, esse consumer faz pesistir os dados no Banco de Dados.
-         ///  Essa API aqui que deveria ter um "POST" faz parte de uma "triade" de Producer - Consumer e ESTA API é
-         ///  somente para visualizar atualizar ou deletar dados.
-         /// </summary>
-         
-        [HttpPut("From-Body")]
-        public async Task<ActionResult<OrderDTO>> Updade([FromBody] OrderDTO dto)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Put(int id, OrderDTO model)
+    {
+        try
         {
-            try
-            {                     
-                var cel = await _orderRepository.Update(dto);
-                return Ok(cel);
-            }
-            catch (Exception)
+            var odr = await _orderRepository.GetByIdAsync(id);
+
+            if (odr == null) BadRequest("Order não Encontrada !!!");
+
+            //Abaixo Mapeamento para o PUT.
+            _mapper.Map(model, odr);
+
+            _orderRepository.Update(odr);
+
+            if (await _orderRepository.SaveChangesAsync())
             {
-
-                return BadRequest("Ordem não encontrada !");
-            }              
+                // Ao Ivés do OK (cód. 200, o Created retorna um 201).
+                return Created($"/api/treino/{model.Id}", _mapper.Map<OrderDTO>(odr));
+            }
         }
-
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        catch (Exception)
         {
-            var status = await _orderRepository.Delete(id);
-            // Se o status for false -> " if (!status)  "
-            if (!status) return BadRequest("Ordem de concerto " + id + " não foi encontrada !!!");
-            return Ok(status);
+            // 
         }
+
+        return BadRequest("Falha ao atualizar o  registro do Produto !!!");
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<Order>> Delete(int id)
+    {
+        var odr = await _orderRepository.GetByIdAsync(id);
+
+        if (odr == null) return BadRequest("Order não Encontrada !!!");
+
+
+        _orderRepository.Delete(odr);
+
+        if (await _orderRepository.SaveChangesAsync())
+        {
+            return Ok("Produto Excluido com Sucesso !!!");
+        }
+        return BadRequest("Falha ao Excluir o registro do Produto !!!");
     }
 }
