@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using OrderRabbitMQApi.DTO;
 using OrderRabbitMQApi.Models;
 using OrderRabbitMQApi.Repository;
-//
 
 namespace OrderRabbitMQApi.Controller;
 
